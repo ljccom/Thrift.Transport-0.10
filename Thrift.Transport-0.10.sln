@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrift.Transport-0.10", "LJC.FrameWork.Thrift\Thrift.Transport-0.10.csproj", "{D818E080-4C78-45E2-AFB5-08F8BED0EF50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApplication", "TestConsoleApplication\TestConsoleApplication.csproj", "{73008AAD-A4FA-4AEB-AB64-FA0CEEBEF212}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D818E080-4C78-45E2-AFB5-08F8BED0EF50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D818E080-4C78-45E2-AFB5-08F8BED0EF50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D818E080-4C78-45E2-AFB5-08F8BED0EF50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D818E080-4C78-45E2-AFB5-08F8BED0EF50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73008AAD-A4FA-4AEB-AB64-FA0CEEBEF212}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73008AAD-A4FA-4AEB-AB64-FA0CEEBEF212}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73008AAD-A4FA-4AEB-AB64-FA0CEEBEF212}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73008AAD-A4FA-4AEB-AB64-FA0CEEBEF212}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
