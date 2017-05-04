@@ -15,45 +15,32 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
     /// <summary>
-    /// Holds column name and the cell.
+    /// if no Result is found, row and columnValues will not be set.
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class TResult : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private byte[] _row;
 
-        public byte[] ColumnName
+        public byte[] Row
         {
             get
             {
-                return _columnName;
+                return _row;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
+                __isset.row = true;
+                this._row = value;
             }
         }
 
-        public TCell Cell
-        {
-            get
-            {
-                return _cell;
-            }
-            set
-            {
-                __isset.cell = true;
-                this._cell = value;
-            }
-        }
+        public List<TColumnValue> ColumnValues { get; set; }
 
 
         public Isset __isset;
@@ -62,12 +49,17 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool row;
         }
 
-        public TColumn()
+        public TResult()
         {
+        }
+
+        public TResult(List<TColumnValue> columnValues)
+            : this()
+        {
+            this.ColumnValues = columnValues;
         }
 
         public void Read(TProtocol iprot)
@@ -75,6 +67,7 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_columnValues = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -89,7 +82,7 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                Row = iprot.ReadBinary();
                             }
                             else
                             {
@@ -97,10 +90,21 @@ namespace HBase.Thrift
                             }
                             break;
                         case 2:
-                            if (field.Type == TType.Struct)
+                            if (field.Type == TType.List)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                {
+                                    ColumnValues = new List<TColumnValue>();
+                                    TList _list0 = iprot.ReadListBegin();
+                                    for (int _i1 = 0; _i1 < _list0.Count; ++_i1)
+                                    {
+                                        TColumnValue _elem2;
+                                        _elem2 = new TColumnValue();
+                                        _elem2.Read(iprot);
+                                        ColumnValues.Add(_elem2);
+                                    }
+                                    iprot.ReadListEnd();
+                                }
+                                isset_columnValues = true;
                             }
                             else
                             {
@@ -114,6 +118,8 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_columnValues)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -126,27 +132,31 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("TResult");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                if (Row != null && __isset.row)
                 {
-                    field.Name = "columnName";
+                    field.Name = "row";
                     field.Type = TType.String;
                     field.ID = 1;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
+                    oprot.WriteBinary(Row);
                     oprot.WriteFieldEnd();
                 }
-                if (Cell != null && __isset.cell)
+                field.Name = "columnValues";
+                field.Type = TType.List;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
                 {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
-                    field.ID = 2;
-                    oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
-                    oprot.WriteFieldEnd();
+                    oprot.WriteListBegin(new TList(TType.Struct, ColumnValues.Count));
+                    foreach (TColumnValue _iter3 in ColumnValues)
+                    {
+                        _iter3.Write(oprot);
+                    }
+                    oprot.WriteListEnd();
                 }
+                oprot.WriteFieldEnd();
                 oprot.WriteFieldStop();
                 oprot.WriteStructEnd();
             }
@@ -158,26 +168,22 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
+            StringBuilder __sb = new StringBuilder("TResult(");
             bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            if (Row != null && __isset.row)
             {
                 if (!__first) { __sb.Append(", "); }
                 __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
+                __sb.Append("Row: ");
+                __sb.Append(Row);
             }
-            if (Cell != null && __isset.cell)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
-            }
+            if (!__first) { __sb.Append(", "); }
+            __sb.Append("ColumnValues: ");
+            __sb.Append(ColumnValues);
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

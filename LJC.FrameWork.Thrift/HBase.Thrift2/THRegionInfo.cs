@@ -15,24 +15,22 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
-    /// <summary>
-    /// A TRegionInfo contains information about an HTable region.
-    /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TRegionInfo : TBase
+    public partial class THRegionInfo : TBase
     {
         private byte[] _startKey;
         private byte[] _endKey;
-        private long _id;
-        private byte[] _name;
-        private sbyte _version;
-        private byte[] _serverName;
-        private int _port;
+        private bool _offline;
+        private bool _split;
+        private int _replicaId;
+
+        public long RegionId { get; set; }
+
+        public byte[] TableName { get; set; }
 
         public byte[] StartKey
         {
@@ -60,68 +58,42 @@ namespace HBase.Thrift
             }
         }
 
-        public long Id
+        public bool Offline
         {
             get
             {
-                return _id;
+                return _offline;
             }
             set
             {
-                __isset.id = true;
-                this._id = value;
+                __isset.offline = true;
+                this._offline = value;
             }
         }
 
-        public byte[] Name
+        public bool Split
         {
             get
             {
-                return _name;
+                return _split;
             }
             set
             {
-                __isset.name = true;
-                this._name = value;
+                __isset.split = true;
+                this._split = value;
             }
         }
 
-        public sbyte Version
+        public int ReplicaId
         {
             get
             {
-                return _version;
+                return _replicaId;
             }
             set
             {
-                __isset.version = true;
-                this._version = value;
-            }
-        }
-
-        public byte[] ServerName
-        {
-            get
-            {
-                return _serverName;
-            }
-            set
-            {
-                __isset.serverName = true;
-                this._serverName = value;
-            }
-        }
-
-        public int Port
-        {
-            get
-            {
-                return _port;
-            }
-            set
-            {
-                __isset.port = true;
-                this._port = value;
+                __isset.replicaId = true;
+                this._replicaId = value;
             }
         }
 
@@ -134,15 +106,20 @@ namespace HBase.Thrift
         {
             public bool startKey;
             public bool endKey;
-            public bool id;
-            public bool name;
-            public bool version;
-            public bool serverName;
-            public bool port;
+            public bool offline;
+            public bool split;
+            public bool replicaId;
         }
 
-        public TRegionInfo()
+        public THRegionInfo()
         {
+        }
+
+        public THRegionInfo(long regionId, byte[] tableName)
+            : this()
+        {
+            this.RegionId = regionId;
+            this.TableName = tableName;
         }
 
         public void Read(TProtocol iprot)
@@ -150,6 +127,8 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_regionId = false;
+                bool isset_tableName = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -162,9 +141,10 @@ namespace HBase.Thrift
                     switch (field.ID)
                     {
                         case 1:
-                            if (field.Type == TType.String)
+                            if (field.Type == TType.I64)
                             {
-                                StartKey = iprot.ReadBinary();
+                                RegionId = iprot.ReadI64();
+                                isset_regionId = true;
                             }
                             else
                             {
@@ -174,7 +154,8 @@ namespace HBase.Thrift
                         case 2:
                             if (field.Type == TType.String)
                             {
-                                EndKey = iprot.ReadBinary();
+                                TableName = iprot.ReadBinary();
+                                isset_tableName = true;
                             }
                             else
                             {
@@ -182,9 +163,9 @@ namespace HBase.Thrift
                             }
                             break;
                         case 3:
-                            if (field.Type == TType.I64)
+                            if (field.Type == TType.String)
                             {
-                                Id = iprot.ReadI64();
+                                StartKey = iprot.ReadBinary();
                             }
                             else
                             {
@@ -194,7 +175,7 @@ namespace HBase.Thrift
                         case 4:
                             if (field.Type == TType.String)
                             {
-                                Name = iprot.ReadBinary();
+                                EndKey = iprot.ReadBinary();
                             }
                             else
                             {
@@ -202,9 +183,9 @@ namespace HBase.Thrift
                             }
                             break;
                         case 5:
-                            if (field.Type == TType.Byte)
+                            if (field.Type == TType.Bool)
                             {
-                                Version = iprot.ReadByte();
+                                Offline = iprot.ReadBool();
                             }
                             else
                             {
@@ -212,9 +193,9 @@ namespace HBase.Thrift
                             }
                             break;
                         case 6:
-                            if (field.Type == TType.String)
+                            if (field.Type == TType.Bool)
                             {
-                                ServerName = iprot.ReadBinary();
+                                Split = iprot.ReadBool();
                             }
                             else
                             {
@@ -224,7 +205,7 @@ namespace HBase.Thrift
                         case 7:
                             if (field.Type == TType.I32)
                             {
-                                Port = iprot.ReadI32();
+                                ReplicaId = iprot.ReadI32();
                             }
                             else
                             {
@@ -238,6 +219,10 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_regionId)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_tableName)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -250,14 +235,26 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TRegionInfo");
+                TStruct struc = new TStruct("THRegionInfo");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
+                field.Name = "regionId";
+                field.Type = TType.I64;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteI64(RegionId);
+                oprot.WriteFieldEnd();
+                field.Name = "tableName";
+                field.Type = TType.String;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(TableName);
+                oprot.WriteFieldEnd();
                 if (StartKey != null && __isset.startKey)
                 {
                     field.Name = "startKey";
                     field.Type = TType.String;
-                    field.ID = 1;
+                    field.ID = 3;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteBinary(StartKey);
                     oprot.WriteFieldEnd();
@@ -266,54 +263,36 @@ namespace HBase.Thrift
                 {
                     field.Name = "endKey";
                     field.Type = TType.String;
-                    field.ID = 2;
+                    field.ID = 4;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteBinary(EndKey);
                     oprot.WriteFieldEnd();
                 }
-                if (__isset.id)
+                if (__isset.offline)
                 {
-                    field.Name = "id";
-                    field.Type = TType.I64;
-                    field.ID = 3;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteI64(Id);
-                    oprot.WriteFieldEnd();
-                }
-                if (Name != null && __isset.name)
-                {
-                    field.Name = "name";
-                    field.Type = TType.String;
-                    field.ID = 4;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(Name);
-                    oprot.WriteFieldEnd();
-                }
-                if (__isset.version)
-                {
-                    field.Name = "version";
-                    field.Type = TType.Byte;
+                    field.Name = "offline";
+                    field.Type = TType.Bool;
                     field.ID = 5;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteByte(Version);
+                    oprot.WriteBool(Offline);
                     oprot.WriteFieldEnd();
                 }
-                if (ServerName != null && __isset.serverName)
+                if (__isset.split)
                 {
-                    field.Name = "serverName";
-                    field.Type = TType.String;
+                    field.Name = "split";
+                    field.Type = TType.Bool;
                     field.ID = 6;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ServerName);
+                    oprot.WriteBool(Split);
                     oprot.WriteFieldEnd();
                 }
-                if (__isset.port)
+                if (__isset.replicaId)
                 {
-                    field.Name = "port";
+                    field.Name = "replicaId";
                     field.Type = TType.I32;
                     field.ID = 7;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteI32(Port);
+                    oprot.WriteI32(ReplicaId);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -327,56 +306,35 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TRegionInfo(");
-            bool __first = true;
+            StringBuilder __sb = new StringBuilder("THRegionInfo(");
+            __sb.Append(", RegionId: ");
+            __sb.Append(RegionId);
+            __sb.Append(", TableName: ");
+            __sb.Append(TableName);
             if (StartKey != null && __isset.startKey)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("StartKey: ");
+                __sb.Append(", StartKey: ");
                 __sb.Append(StartKey);
             }
             if (EndKey != null && __isset.endKey)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("EndKey: ");
+                __sb.Append(", EndKey: ");
                 __sb.Append(EndKey);
             }
-            if (__isset.id)
+            if (__isset.offline)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Id: ");
-                __sb.Append(Id);
+                __sb.Append(", Offline: ");
+                __sb.Append(Offline);
             }
-            if (Name != null && __isset.name)
+            if (__isset.split)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Name: ");
-                __sb.Append(Name);
+                __sb.Append(", Split: ");
+                __sb.Append(Split);
             }
-            if (__isset.version)
+            if (__isset.replicaId)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Version: ");
-                __sb.Append(Version);
-            }
-            if (ServerName != null && __isset.serverName)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("ServerName: ");
-                __sb.Append(ServerName);
-            }
-            if (__isset.port)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Port: ");
-                __sb.Append(Port);
+                __sb.Append(", ReplicaId: ");
+                __sb.Append(ReplicaId);
             }
             __sb.Append(")");
             return __sb.ToString();

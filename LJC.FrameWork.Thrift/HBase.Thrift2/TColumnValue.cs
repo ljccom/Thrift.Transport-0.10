@@ -15,71 +15,48 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
     /// <summary>
-    /// For increments that are not incrementColumnValue
-    /// equivalents.
+    /// Represents a single cell and its value.
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TIncrement : TBase
+    public partial class TColumnValue : TBase
     {
-        private byte[] _table;
-        private byte[] _row;
-        private byte[] _column;
-        private long _ammount;
+        private long _timestamp;
+        private byte[] _tags;
 
-        public byte[] Table
+        public byte[] Family { get; set; }
+
+        public byte[] Qualifier { get; set; }
+
+        public byte[] Value { get; set; }
+
+        public long Timestamp
         {
             get
             {
-                return _table;
+                return _timestamp;
             }
             set
             {
-                __isset.table = true;
-                this._table = value;
+                __isset.timestamp = true;
+                this._timestamp = value;
             }
         }
 
-        public byte[] Row
+        public byte[] Tags
         {
             get
             {
-                return _row;
+                return _tags;
             }
             set
             {
-                __isset.row = true;
-                this._row = value;
-            }
-        }
-
-        public byte[] Column
-        {
-            get
-            {
-                return _column;
-            }
-            set
-            {
-                __isset.column = true;
-                this._column = value;
-            }
-        }
-
-        public long Ammount
-        {
-            get
-            {
-                return _ammount;
-            }
-            set
-            {
-                __isset.ammount = true;
-                this._ammount = value;
+                __isset.tags = true;
+                this._tags = value;
             }
         }
 
@@ -90,14 +67,20 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool table;
-            public bool row;
-            public bool column;
-            public bool ammount;
+            public bool timestamp;
+            public bool tags;
         }
 
-        public TIncrement()
+        public TColumnValue()
         {
+        }
+
+        public TColumnValue(byte[] family, byte[] qualifier, byte[] value)
+            : this()
+        {
+            this.Family = family;
+            this.Qualifier = qualifier;
+            this.Value = value;
         }
 
         public void Read(TProtocol iprot)
@@ -105,6 +88,9 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_family = false;
+                bool isset_qualifier = false;
+                bool isset_value = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -119,7 +105,8 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                Table = iprot.ReadBinary();
+                                Family = iprot.ReadBinary();
+                                isset_family = true;
                             }
                             else
                             {
@@ -129,7 +116,8 @@ namespace HBase.Thrift
                         case 2:
                             if (field.Type == TType.String)
                             {
-                                Row = iprot.ReadBinary();
+                                Qualifier = iprot.ReadBinary();
+                                isset_qualifier = true;
                             }
                             else
                             {
@@ -139,7 +127,8 @@ namespace HBase.Thrift
                         case 3:
                             if (field.Type == TType.String)
                             {
-                                Column = iprot.ReadBinary();
+                                Value = iprot.ReadBinary();
+                                isset_value = true;
                             }
                             else
                             {
@@ -149,7 +138,17 @@ namespace HBase.Thrift
                         case 4:
                             if (field.Type == TType.I64)
                             {
-                                Ammount = iprot.ReadI64();
+                                Timestamp = iprot.ReadI64();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 5:
+                            if (field.Type == TType.String)
+                            {
+                                Tags = iprot.ReadBinary();
                             }
                             else
                             {
@@ -163,6 +162,12 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_family)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_qualifier)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_value)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -175,43 +180,43 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TIncrement");
+                TStruct struc = new TStruct("TColumnValue");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (Table != null && __isset.table)
+                field.Name = "family";
+                field.Type = TType.String;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Family);
+                oprot.WriteFieldEnd();
+                field.Name = "qualifier";
+                field.Type = TType.String;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Qualifier);
+                oprot.WriteFieldEnd();
+                field.Name = "value";
+                field.Type = TType.String;
+                field.ID = 3;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Value);
+                oprot.WriteFieldEnd();
+                if (__isset.timestamp)
                 {
-                    field.Name = "table";
-                    field.Type = TType.String;
-                    field.ID = 1;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(Table);
-                    oprot.WriteFieldEnd();
-                }
-                if (Row != null && __isset.row)
-                {
-                    field.Name = "row";
-                    field.Type = TType.String;
-                    field.ID = 2;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(Row);
-                    oprot.WriteFieldEnd();
-                }
-                if (Column != null && __isset.column)
-                {
-                    field.Name = "column";
-                    field.Type = TType.String;
-                    field.ID = 3;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(Column);
-                    oprot.WriteFieldEnd();
-                }
-                if (__isset.ammount)
-                {
-                    field.Name = "ammount";
+                    field.Name = "timestamp";
                     field.Type = TType.I64;
                     field.ID = 4;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteI64(Ammount);
+                    oprot.WriteI64(Timestamp);
+                    oprot.WriteFieldEnd();
+                }
+                if (Tags != null && __isset.tags)
+                {
+                    field.Name = "tags";
+                    field.Type = TType.String;
+                    field.ID = 5;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteBinary(Tags);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -225,35 +230,22 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TIncrement(");
-            bool __first = true;
-            if (Table != null && __isset.table)
+            StringBuilder __sb = new StringBuilder("TColumnValue(");
+            __sb.Append(", Family: ");
+            __sb.Append(Family);
+            __sb.Append(", Qualifier: ");
+            __sb.Append(Qualifier);
+            __sb.Append(", Value: ");
+            __sb.Append(Value);
+            if (__isset.timestamp)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Table: ");
-                __sb.Append(Table);
+                __sb.Append(", Timestamp: ");
+                __sb.Append(Timestamp);
             }
-            if (Row != null && __isset.row)
+            if (Tags != null && __isset.tags)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Row: ");
-                __sb.Append(Row);
-            }
-            if (Column != null && __isset.column)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Column: ");
-                __sb.Append(Column);
-            }
-            if (__isset.ammount)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Ammount: ");
-                __sb.Append(Ammount);
+                __sb.Append(", Tags: ");
+                __sb.Append(Tags);
             }
             __sb.Append(")");
             return __sb.ToString();

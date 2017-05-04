@@ -15,43 +15,32 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
     /// <summary>
-    /// Holds column name and the cell.
+    /// Represents a single cell and the amount to increment it by
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class TColumnIncrement : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private long _amount;
 
-        public byte[] ColumnName
+        public byte[] Family { get; set; }
+
+        public byte[] Qualifier { get; set; }
+
+        public long Amount
         {
             get
             {
-                return _columnName;
+                return _amount;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
-            }
-        }
-
-        public TCell Cell
-        {
-            get
-            {
-                return _cell;
-            }
-            set
-            {
-                __isset.cell = true;
-                this._cell = value;
+                __isset.amount = true;
+                this._amount = value;
             }
         }
 
@@ -62,12 +51,20 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool amount;
         }
 
-        public TColumn()
+        public TColumnIncrement()
         {
+            this._amount = 1;
+            this.__isset.amount = true;
+        }
+
+        public TColumnIncrement(byte[] family, byte[] qualifier)
+            : this()
+        {
+            this.Family = family;
+            this.Qualifier = qualifier;
         }
 
         public void Read(TProtocol iprot)
@@ -75,6 +72,8 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_family = false;
+                bool isset_qualifier = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -89,7 +88,8 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                Family = iprot.ReadBinary();
+                                isset_family = true;
                             }
                             else
                             {
@@ -97,10 +97,20 @@ namespace HBase.Thrift
                             }
                             break;
                         case 2:
-                            if (field.Type == TType.Struct)
+                            if (field.Type == TType.String)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                Qualifier = iprot.ReadBinary();
+                                isset_qualifier = true;
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 3:
+                            if (field.Type == TType.I64)
+                            {
+                                Amount = iprot.ReadI64();
                             }
                             else
                             {
@@ -114,6 +124,10 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_family)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_qualifier)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -126,25 +140,28 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("TColumnIncrement");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                field.Name = "family";
+                field.Type = TType.String;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Family);
+                oprot.WriteFieldEnd();
+                field.Name = "qualifier";
+                field.Type = TType.String;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Qualifier);
+                oprot.WriteFieldEnd();
+                if (__isset.amount)
                 {
-                    field.Name = "columnName";
-                    field.Type = TType.String;
-                    field.ID = 1;
+                    field.Name = "amount";
+                    field.Type = TType.I64;
+                    field.ID = 3;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
-                    oprot.WriteFieldEnd();
-                }
-                if (Cell != null && __isset.cell)
-                {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
-                    field.ID = 2;
-                    oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
+                    oprot.WriteI64(Amount);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -158,26 +175,20 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
-            bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            StringBuilder __sb = new StringBuilder("TColumnIncrement(");
+            __sb.Append(", Family: ");
+            __sb.Append(Family);
+            __sb.Append(", Qualifier: ");
+            __sb.Append(Qualifier);
+            if (__isset.amount)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
-            }
-            if (Cell != null && __isset.cell)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
+                __sb.Append(", Amount: ");
+                __sb.Append(Amount);
             }
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

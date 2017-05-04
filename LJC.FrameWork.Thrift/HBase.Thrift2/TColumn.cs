@@ -15,43 +15,46 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
     /// <summary>
-    /// Holds column name and the cell.
+    /// Addresses a single cell or multiple cells
+    /// in a HBase table by column family and optionally
+    /// a column qualifier and timestamp
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
     public partial class TColumn : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private byte[] _qualifier;
+        private long _timestamp;
 
-        public byte[] ColumnName
+        public byte[] Family { get; set; }
+
+        public byte[] Qualifier
         {
             get
             {
-                return _columnName;
+                return _qualifier;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
+                __isset.qualifier = true;
+                this._qualifier = value;
             }
         }
 
-        public TCell Cell
+        public long Timestamp
         {
             get
             {
-                return _cell;
+                return _timestamp;
             }
             set
             {
-                __isset.cell = true;
-                this._cell = value;
+                __isset.timestamp = true;
+                this._timestamp = value;
             }
         }
 
@@ -62,12 +65,18 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool qualifier;
+            public bool timestamp;
         }
 
         public TColumn()
         {
+        }
+
+        public TColumn(byte[] family)
+            : this()
+        {
+            this.Family = family;
         }
 
         public void Read(TProtocol iprot)
@@ -75,6 +84,7 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_family = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -89,7 +99,8 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                Family = iprot.ReadBinary();
+                                isset_family = true;
                             }
                             else
                             {
@@ -97,10 +108,19 @@ namespace HBase.Thrift
                             }
                             break;
                         case 2:
-                            if (field.Type == TType.Struct)
+                            if (field.Type == TType.String)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                Qualifier = iprot.ReadBinary();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 3:
+                            if (field.Type == TType.I64)
+                            {
+                                Timestamp = iprot.ReadI64();
                             }
                             else
                             {
@@ -114,6 +134,8 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_family)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -129,22 +151,28 @@ namespace HBase.Thrift
                 TStruct struc = new TStruct("TColumn");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                field.Name = "family";
+                field.Type = TType.String;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(Family);
+                oprot.WriteFieldEnd();
+                if (Qualifier != null && __isset.qualifier)
                 {
-                    field.Name = "columnName";
+                    field.Name = "qualifier";
                     field.Type = TType.String;
-                    field.ID = 1;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
-                    oprot.WriteFieldEnd();
-                }
-                if (Cell != null && __isset.cell)
-                {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
                     field.ID = 2;
                     oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
+                    oprot.WriteBinary(Qualifier);
+                    oprot.WriteFieldEnd();
+                }
+                if (__isset.timestamp)
+                {
+                    field.Name = "timestamp";
+                    field.Type = TType.I64;
+                    field.ID = 3;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteI64(Timestamp);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -159,20 +187,17 @@ namespace HBase.Thrift
         public override string ToString()
         {
             StringBuilder __sb = new StringBuilder("TColumn(");
-            bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            __sb.Append(", Family: ");
+            __sb.Append(Family);
+            if (Qualifier != null && __isset.qualifier)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
+                __sb.Append(", Qualifier: ");
+                __sb.Append(Qualifier);
             }
-            if (Cell != null && __isset.cell)
+            if (__isset.timestamp)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
+                __sb.Append(", Timestamp: ");
+                __sb.Append(Timestamp);
             }
             __sb.Append(")");
             return __sb.ToString();
@@ -180,4 +205,3 @@ namespace HBase.Thrift
 
     }
 }
-

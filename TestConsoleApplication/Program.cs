@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HBase.Thrift;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace TestConsoleApplication
             try
             {
                 //实例化Socket连接
-                transport = new TSocket("192.168.0.110", 9090);
+                transport = new TSocket("2.5.172.38", 30001);
                 //实例化一个协议对象
                 TProtocol tProtocol = new TBinaryProtocol(transport);
                 //实例化一个Hbase的Client对象
@@ -24,15 +25,16 @@ namespace TestConsoleApplication
                 transport.Open();
 
                 Console.Write("已连接上");
-
-                client.createTable(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), new List<ColumnDescriptor> { new ColumnDescriptor { Name = Encoding.UTF8.GetBytes("col1") } });
-                Console.Write("创建表");
+                client.disableTable(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"));
+                client.deleteTable(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"));
+                //client.createTable(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), new List<ColumnDescriptor> { new ColumnDescriptor { Name = Encoding.UTF8.GetBytes("col1") } });
+                //Console.Write("创建表");
                 
-                var boo=client.checkAndPut(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), Encoding.UTF8.GetBytes("201310_001_0_1100"), Encoding.UTF8.GetBytes("col1"), Encoding.UTF8.GetBytes("val"), null, null);
-                Console.WriteLine("写数据:" + boo);
+                //var boo=client.checkAndPut(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), Encoding.UTF8.GetBytes("201310_001_0_1100"), Encoding.UTF8.GetBytes("col1"), Encoding.UTF8.GetBytes("val"), null, null);
+                //Console.WriteLine("写数据:" + boo);
 
                 //根据表名，RowKey名来获取结果集
-                List<TRowResult> reslut = client.getRow(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), Encoding.UTF8.GetBytes("201310_001_0_1100"), null);
+                List<TRowResult> reslut = client.getRow(Encoding.UTF8.GetBytes("dz_CDN_Ip_Stat"), Encoding.UTF8.GetBytes("row1"), null);
                 Console.WriteLine("读数据:" + reslut.Count);
 
                 //遍历结果集

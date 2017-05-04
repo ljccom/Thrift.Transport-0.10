@@ -15,44 +15,27 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-    /// <summary>
-    /// An AlreadyExists exceptions signals that a table with the specified
-    /// name already exists
-    /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class AlreadyExists : TException, TBase
+    public partial class TTimeRange : TBase
     {
-        private string _message;
 
-        public string Message
+        public long MinStamp { get; set; }
+
+        public long MaxStamp { get; set; }
+
+        public TTimeRange()
         {
-            get
-            {
-                return _message;
-            }
-            set
-            {
-                __isset.message = true;
-                this._message = value;
-            }
         }
 
-
-        public Isset __isset;
-#if !SILVERLIGHT
-        [Serializable]
-#endif
-        public struct Isset
+        public TTimeRange(long minStamp, long maxStamp)
+            : this()
         {
-            public bool message;
-        }
-
-        public AlreadyExists()
-        {
+            this.MinStamp = minStamp;
+            this.MaxStamp = maxStamp;
         }
 
         public void Read(TProtocol iprot)
@@ -60,6 +43,8 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_minStamp = false;
+                bool isset_maxStamp = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -72,9 +57,21 @@ namespace HBase.Thrift
                     switch (field.ID)
                     {
                         case 1:
-                            if (field.Type == TType.String)
+                            if (field.Type == TType.I64)
                             {
-                                Message = iprot.ReadString();
+                                MinStamp = iprot.ReadI64();
+                                isset_minStamp = true;
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 2:
+                            if (field.Type == TType.I64)
+                            {
+                                MaxStamp = iprot.ReadI64();
+                                isset_maxStamp = true;
                             }
                             else
                             {
@@ -88,6 +85,10 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_minStamp)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_maxStamp)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -100,18 +101,21 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("AlreadyExists");
+                TStruct struc = new TStruct("TTimeRange");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (Message != null && __isset.message)
-                {
-                    field.Name = "message";
-                    field.Type = TType.String;
-                    field.ID = 1;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteString(Message);
-                    oprot.WriteFieldEnd();
-                }
+                field.Name = "minStamp";
+                field.Type = TType.I64;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteI64(MinStamp);
+                oprot.WriteFieldEnd();
+                field.Name = "maxStamp";
+                field.Type = TType.I64;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteI64(MaxStamp);
+                oprot.WriteFieldEnd();
                 oprot.WriteFieldStop();
                 oprot.WriteStructEnd();
             }
@@ -123,19 +127,14 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("AlreadyExists(");
-            bool __first = true;
-            if (Message != null && __isset.message)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Message: ");
-                __sb.Append(Message);
-            }
+            StringBuilder __sb = new StringBuilder("TTimeRange(");
+            __sb.Append(", MinStamp: ");
+            __sb.Append(MinStamp);
+            __sb.Append(", MaxStamp: ");
+            __sb.Append(MaxStamp);
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
 }
-

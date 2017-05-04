@@ -15,153 +15,170 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-
-/// <summary>
-/// TCell - Used to transport a cell value (byte[]) and the timestamp it was
-/// stored with together as a result for get and getRow methods. This promotes
-/// the timestamp of a cell to a first-class value, making it easy to take
-/// note of temporal data. Cell is used all the way from HStore up to HTable.
-/// </summary>
-#if !SILVERLIGHT
-[Serializable]
-#endif
-public partial class TCell : TBase
+namespace HBase.Thrift
 {
-  private byte[] _value;
-  private long _timestamp;
-
-  public byte[] Value
-  {
-    get
+    /// <summary>
+    /// TCell - Used to transport a cell value (byte[]) and the timestamp it was
+    /// stored with together as a result for get and getRow methods. This promotes
+    /// the timestamp of a cell to a first-class value, making it easy to take
+    /// note of temporal data. Cell is used all the way from HStore up to HTable.
+    /// </summary>
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    public partial class TCell : TBase
     {
-      return _value;
-    }
-    set
-    {
-      __isset.@value = true;
-      this._value = value;
-    }
-  }
+        private byte[] _value;
+        private long _timestamp;
 
-  public long Timestamp
-  {
-    get
-    {
-      return _timestamp;
-    }
-    set
-    {
-      __isset.timestamp = true;
-      this._timestamp = value;
-    }
-  }
-
-
-  public Isset __isset;
-  #if !SILVERLIGHT
-  [Serializable]
-  #endif
-  public struct Isset {
-    public bool @value;
-    public bool timestamp;
-  }
-
-  public TCell() {
-  }
-
-  public void Read (TProtocol iprot)
-  {
-    iprot.IncrementRecursionDepth();
-    try
-    {
-      TField field;
-      iprot.ReadStructBegin();
-      while (true)
-      {
-        field = iprot.ReadFieldBegin();
-        if (field.Type == TType.Stop) { 
-          break;
-        }
-        switch (field.ID)
+        public byte[] Value
         {
-          case 1:
-            if (field.Type == TType.String) {
-              Value = iprot.ReadBinary();
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+            get
+            {
+                return _value;
             }
-            break;
-          case 2:
-            if (field.Type == TType.I64) {
-              Timestamp = iprot.ReadI64();
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+            set
+            {
+                __isset.@value = true;
+                this._value = value;
             }
-            break;
-          default: 
-            TProtocolUtil.Skip(iprot, field.Type);
-            break;
         }
-        iprot.ReadFieldEnd();
-      }
-      iprot.ReadStructEnd();
-    }
-    finally
-    {
-      iprot.DecrementRecursionDepth();
-    }
-  }
 
-  public void Write(TProtocol oprot) {
-    oprot.IncrementRecursionDepth();
-    try
-    {
-      TStruct struc = new TStruct("TCell");
-      oprot.WriteStructBegin(struc);
-      TField field = new TField();
-      if (Value != null && __isset.@value) {
-        field.Name = "value";
-        field.Type = TType.String;
-        field.ID = 1;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteBinary(Value);
-        oprot.WriteFieldEnd();
-      }
-      if (__isset.timestamp) {
-        field.Name = "timestamp";
-        field.Type = TType.I64;
-        field.ID = 2;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteI64(Timestamp);
-        oprot.WriteFieldEnd();
-      }
-      oprot.WriteFieldStop();
-      oprot.WriteStructEnd();
-    }
-    finally
-    {
-      oprot.DecrementRecursionDepth();
-    }
-  }
+        public long Timestamp
+        {
+            get
+            {
+                return _timestamp;
+            }
+            set
+            {
+                __isset.timestamp = true;
+                this._timestamp = value;
+            }
+        }
 
-  public override string ToString() {
-    StringBuilder __sb = new StringBuilder("TCell(");
-    bool __first = true;
-    if (Value != null && __isset.@value) {
-      if(!__first) { __sb.Append(", "); }
-      __first = false;
-      __sb.Append("Value: ");
-      __sb.Append(Value);
-    }
-    if (__isset.timestamp) {
-      if(!__first) { __sb.Append(", "); }
-      __first = false;
-      __sb.Append("Timestamp: ");
-      __sb.Append(Timestamp);
-    }
-    __sb.Append(")");
-    return __sb.ToString();
-  }
 
+        public Isset __isset;
+#if !SILVERLIGHT
+        [Serializable]
+#endif
+        public struct Isset
+        {
+            public bool @value;
+            public bool timestamp;
+        }
+
+        public TCell()
+        {
+        }
+
+        public void Read(TProtocol iprot)
+        {
+            iprot.IncrementRecursionDepth();
+            try
+            {
+                TField field;
+                iprot.ReadStructBegin();
+                while (true)
+                {
+                    field = iprot.ReadFieldBegin();
+                    if (field.Type == TType.Stop)
+                    {
+                        break;
+                    }
+                    switch (field.ID)
+                    {
+                        case 1:
+                            if (field.Type == TType.String)
+                            {
+                                Value = iprot.ReadBinary();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 2:
+                            if (field.Type == TType.I64)
+                            {
+                                Timestamp = iprot.ReadI64();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        default:
+                            TProtocolUtil.Skip(iprot, field.Type);
+                            break;
+                    }
+                    iprot.ReadFieldEnd();
+                }
+                iprot.ReadStructEnd();
+            }
+            finally
+            {
+                iprot.DecrementRecursionDepth();
+            }
+        }
+
+        public void Write(TProtocol oprot)
+        {
+            oprot.IncrementRecursionDepth();
+            try
+            {
+                TStruct struc = new TStruct("TCell");
+                oprot.WriteStructBegin(struc);
+                TField field = new TField();
+                if (Value != null && __isset.@value)
+                {
+                    field.Name = "value";
+                    field.Type = TType.String;
+                    field.ID = 1;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteBinary(Value);
+                    oprot.WriteFieldEnd();
+                }
+                if (__isset.timestamp)
+                {
+                    field.Name = "timestamp";
+                    field.Type = TType.I64;
+                    field.ID = 2;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteI64(Timestamp);
+                    oprot.WriteFieldEnd();
+                }
+                oprot.WriteFieldStop();
+                oprot.WriteStructEnd();
+            }
+            finally
+            {
+                oprot.DecrementRecursionDepth();
+            }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder __sb = new StringBuilder("TCell(");
+            bool __first = true;
+            if (Value != null && __isset.@value)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("Value: ");
+                __sb.Append(Value);
+            }
+            if (__isset.timestamp)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("Timestamp: ");
+                __sb.Append(Timestamp);
+            }
+            __sb.Append(")");
+            return __sb.ToString();
+        }
+
+    }
 }
 

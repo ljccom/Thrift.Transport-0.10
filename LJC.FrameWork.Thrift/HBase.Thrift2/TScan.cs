@@ -15,10 +15,11 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
     /// <summary>
-    /// A Scan object is used to specify scanner parameters when opening a scanner.
+    /// Any timestamps in the columns are ignored, use timeRange to select by timestamp.
+    /// Max versions defaults to 1.
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
@@ -27,12 +28,14 @@ namespace HBase.Thrift
     {
         private byte[] _startRow;
         private byte[] _stopRow;
-        private long _timestamp;
-        private List<byte[]> _columns;
+        private List<TColumn> _columns;
         private int _caching;
+        private int _maxVersions;
+        private TTimeRange _timeRange;
         private byte[] _filterString;
         private int _batchSize;
-        private bool _sortColumns;
+        private Dictionary<byte[], byte[]> _attributes;
+        private TAuthorization _authorizations;
         private bool _reversed;
         private bool _cacheBlocks;
 
@@ -62,20 +65,7 @@ namespace HBase.Thrift
             }
         }
 
-        public long Timestamp
-        {
-            get
-            {
-                return _timestamp;
-            }
-            set
-            {
-                __isset.timestamp = true;
-                this._timestamp = value;
-            }
-        }
-
-        public List<byte[]> Columns
+        public List<TColumn> Columns
         {
             get
             {
@@ -98,6 +88,32 @@ namespace HBase.Thrift
             {
                 __isset.caching = true;
                 this._caching = value;
+            }
+        }
+
+        public int MaxVersions
+        {
+            get
+            {
+                return _maxVersions;
+            }
+            set
+            {
+                __isset.maxVersions = true;
+                this._maxVersions = value;
+            }
+        }
+
+        public TTimeRange TimeRange
+        {
+            get
+            {
+                return _timeRange;
+            }
+            set
+            {
+                __isset.timeRange = true;
+                this._timeRange = value;
             }
         }
 
@@ -127,16 +143,29 @@ namespace HBase.Thrift
             }
         }
 
-        public bool SortColumns
+        public Dictionary<byte[], byte[]> Attributes
         {
             get
             {
-                return _sortColumns;
+                return _attributes;
             }
             set
             {
-                __isset.sortColumns = true;
-                this._sortColumns = value;
+                __isset.attributes = true;
+                this._attributes = value;
+            }
+        }
+
+        public TAuthorization Authorizations
+        {
+            get
+            {
+                return _authorizations;
+            }
+            set
+            {
+                __isset.authorizations = true;
+                this._authorizations = value;
             }
         }
 
@@ -175,18 +204,22 @@ namespace HBase.Thrift
         {
             public bool startRow;
             public bool stopRow;
-            public bool timestamp;
             public bool columns;
             public bool caching;
+            public bool maxVersions;
+            public bool timeRange;
             public bool filterString;
             public bool batchSize;
-            public bool sortColumns;
+            public bool attributes;
+            public bool authorizations;
             public bool reversed;
             public bool cacheBlocks;
         }
 
         public TScan()
         {
+            this._maxVersions = 1;
+            this.__isset.maxVersions = true;
         }
 
         public void Read(TProtocol iprot)
@@ -226,26 +259,17 @@ namespace HBase.Thrift
                             }
                             break;
                         case 3:
-                            if (field.Type == TType.I64)
-                            {
-                                Timestamp = iprot.ReadI64();
-                            }
-                            else
-                            {
-                                TProtocolUtil.Skip(iprot, field.Type);
-                            }
-                            break;
-                        case 4:
                             if (field.Type == TType.List)
                             {
                                 {
-                                    Columns = new List<byte[]>();
-                                    TList _list13 = iprot.ReadListBegin();
-                                    for (int _i14 = 0; _i14 < _list13.Count; ++_i14)
+                                    Columns = new List<TColumn>();
+                                    TList _list53 = iprot.ReadListBegin();
+                                    for (int _i54 = 0; _i54 < _list53.Count; ++_i54)
                                     {
-                                        byte[] _elem15;
-                                        _elem15 = iprot.ReadBinary();
-                                        Columns.Add(_elem15);
+                                        TColumn _elem55;
+                                        _elem55 = new TColumn();
+                                        _elem55.Read(iprot);
+                                        Columns.Add(_elem55);
                                     }
                                     iprot.ReadListEnd();
                                 }
@@ -255,7 +279,7 @@ namespace HBase.Thrift
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
-                        case 5:
+                        case 4:
                             if (field.Type == TType.I32)
                             {
                                 Caching = iprot.ReadI32();
@@ -265,7 +289,28 @@ namespace HBase.Thrift
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
+                        case 5:
+                            if (field.Type == TType.I32)
+                            {
+                                MaxVersions = iprot.ReadI32();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
                         case 6:
+                            if (field.Type == TType.Struct)
+                            {
+                                TimeRange = new TTimeRange();
+                                TimeRange.Read(iprot);
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 7:
                             if (field.Type == TType.String)
                             {
                                 FilterString = iprot.ReadBinary();
@@ -275,7 +320,7 @@ namespace HBase.Thrift
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
-                        case 7:
+                        case 8:
                             if (field.Type == TType.I32)
                             {
                                 BatchSize = iprot.ReadI32();
@@ -285,17 +330,40 @@ namespace HBase.Thrift
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
-                        case 8:
-                            if (field.Type == TType.Bool)
+                        case 9:
+                            if (field.Type == TType.Map)
                             {
-                                SortColumns = iprot.ReadBool();
+                                {
+                                    Attributes = new Dictionary<byte[], byte[]>();
+                                    TMap _map56 = iprot.ReadMapBegin();
+                                    for (int _i57 = 0; _i57 < _map56.Count; ++_i57)
+                                    {
+                                        byte[] _key58;
+                                        byte[] _val59;
+                                        _key58 = iprot.ReadBinary();
+                                        _val59 = iprot.ReadBinary();
+                                        Attributes[_key58] = _val59;
+                                    }
+                                    iprot.ReadMapEnd();
+                                }
                             }
                             else
                             {
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
-                        case 9:
+                        case 10:
+                            if (field.Type == TType.Struct)
+                            {
+                                Authorizations = new TAuthorization();
+                                Authorizations.Read(iprot);
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 11:
                             if (field.Type == TType.Bool)
                             {
                                 Reversed = iprot.ReadBool();
@@ -305,7 +373,7 @@ namespace HBase.Thrift
                                 TProtocolUtil.Skip(iprot, field.Type);
                             }
                             break;
-                        case 10:
+                        case 12:
                             if (field.Type == TType.Bool)
                             {
                                 CacheBlocks = iprot.ReadBool();
@@ -355,26 +423,17 @@ namespace HBase.Thrift
                     oprot.WriteBinary(StopRow);
                     oprot.WriteFieldEnd();
                 }
-                if (__isset.timestamp)
-                {
-                    field.Name = "timestamp";
-                    field.Type = TType.I64;
-                    field.ID = 3;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteI64(Timestamp);
-                    oprot.WriteFieldEnd();
-                }
                 if (Columns != null && __isset.columns)
                 {
                     field.Name = "columns";
                     field.Type = TType.List;
-                    field.ID = 4;
+                    field.ID = 3;
                     oprot.WriteFieldBegin(field);
                     {
-                        oprot.WriteListBegin(new TList(TType.String, Columns.Count));
-                        foreach (byte[] _iter16 in Columns)
+                        oprot.WriteListBegin(new TList(TType.Struct, Columns.Count));
+                        foreach (TColumn _iter60 in Columns)
                         {
-                            oprot.WriteBinary(_iter16);
+                            _iter60.Write(oprot);
                         }
                         oprot.WriteListEnd();
                     }
@@ -384,16 +443,34 @@ namespace HBase.Thrift
                 {
                     field.Name = "caching";
                     field.Type = TType.I32;
-                    field.ID = 5;
+                    field.ID = 4;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteI32(Caching);
+                    oprot.WriteFieldEnd();
+                }
+                if (__isset.maxVersions)
+                {
+                    field.Name = "maxVersions";
+                    field.Type = TType.I32;
+                    field.ID = 5;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteI32(MaxVersions);
+                    oprot.WriteFieldEnd();
+                }
+                if (TimeRange != null && __isset.timeRange)
+                {
+                    field.Name = "timeRange";
+                    field.Type = TType.Struct;
+                    field.ID = 6;
+                    oprot.WriteFieldBegin(field);
+                    TimeRange.Write(oprot);
                     oprot.WriteFieldEnd();
                 }
                 if (FilterString != null && __isset.filterString)
                 {
                     field.Name = "filterString";
                     field.Type = TType.String;
-                    field.ID = 6;
+                    field.ID = 7;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteBinary(FilterString);
                     oprot.WriteFieldEnd();
@@ -402,25 +479,42 @@ namespace HBase.Thrift
                 {
                     field.Name = "batchSize";
                     field.Type = TType.I32;
-                    field.ID = 7;
+                    field.ID = 8;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteI32(BatchSize);
                     oprot.WriteFieldEnd();
                 }
-                if (__isset.sortColumns)
+                if (Attributes != null && __isset.attributes)
                 {
-                    field.Name = "sortColumns";
-                    field.Type = TType.Bool;
-                    field.ID = 8;
+                    field.Name = "attributes";
+                    field.Type = TType.Map;
+                    field.ID = 9;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBool(SortColumns);
+                    {
+                        oprot.WriteMapBegin(new TMap(TType.String, TType.String, Attributes.Count));
+                        foreach (byte[] _iter61 in Attributes.Keys)
+                        {
+                            oprot.WriteBinary(_iter61);
+                            oprot.WriteBinary(Attributes[_iter61]);
+                        }
+                        oprot.WriteMapEnd();
+                    }
+                    oprot.WriteFieldEnd();
+                }
+                if (Authorizations != null && __isset.authorizations)
+                {
+                    field.Name = "authorizations";
+                    field.Type = TType.Struct;
+                    field.ID = 10;
+                    oprot.WriteFieldBegin(field);
+                    Authorizations.Write(oprot);
                     oprot.WriteFieldEnd();
                 }
                 if (__isset.reversed)
                 {
                     field.Name = "reversed";
                     field.Type = TType.Bool;
-                    field.ID = 9;
+                    field.ID = 11;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteBool(Reversed);
                     oprot.WriteFieldEnd();
@@ -429,7 +523,7 @@ namespace HBase.Thrift
                 {
                     field.Name = "cacheBlocks";
                     field.Type = TType.Bool;
-                    field.ID = 10;
+                    field.ID = 12;
                     oprot.WriteFieldBegin(field);
                     oprot.WriteBool(CacheBlocks);
                     oprot.WriteFieldEnd();
@@ -461,13 +555,6 @@ namespace HBase.Thrift
                 __sb.Append("StopRow: ");
                 __sb.Append(StopRow);
             }
-            if (__isset.timestamp)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Timestamp: ");
-                __sb.Append(Timestamp);
-            }
             if (Columns != null && __isset.columns)
             {
                 if (!__first) { __sb.Append(", "); }
@@ -481,6 +568,20 @@ namespace HBase.Thrift
                 __first = false;
                 __sb.Append("Caching: ");
                 __sb.Append(Caching);
+            }
+            if (__isset.maxVersions)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("MaxVersions: ");
+                __sb.Append(MaxVersions);
+            }
+            if (TimeRange != null && __isset.timeRange)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("TimeRange: ");
+                __sb.Append(TimeRange == null ? "<null>" : TimeRange.ToString());
             }
             if (FilterString != null && __isset.filterString)
             {
@@ -496,12 +597,19 @@ namespace HBase.Thrift
                 __sb.Append("BatchSize: ");
                 __sb.Append(BatchSize);
             }
-            if (__isset.sortColumns)
+            if (Attributes != null && __isset.attributes)
             {
                 if (!__first) { __sb.Append(", "); }
                 __first = false;
-                __sb.Append("SortColumns: ");
-                __sb.Append(SortColumns);
+                __sb.Append("Attributes: ");
+                __sb.Append(Attributes);
+            }
+            if (Authorizations != null && __isset.authorizations)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("Authorizations: ");
+                __sb.Append(Authorizations == null ? "<null>" : Authorizations.ToString());
             }
             if (__isset.reversed)
             {

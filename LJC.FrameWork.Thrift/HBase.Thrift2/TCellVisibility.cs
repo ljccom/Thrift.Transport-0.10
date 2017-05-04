@@ -15,43 +15,25 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
-    /// <summary>
-    /// Holds column name and the cell.
-    /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class TCellVisibility : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private string _expression;
 
-        public byte[] ColumnName
+        public string Expression
         {
             get
             {
-                return _columnName;
+                return _expression;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
-            }
-        }
-
-        public TCell Cell
-        {
-            get
-            {
-                return _cell;
-            }
-            set
-            {
-                __isset.cell = true;
-                this._cell = value;
+                __isset.expression = true;
+                this._expression = value;
             }
         }
 
@@ -62,11 +44,10 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool expression;
         }
 
-        public TColumn()
+        public TCellVisibility()
         {
         }
 
@@ -89,18 +70,7 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                ColumnName = iprot.ReadBinary();
-                            }
-                            else
-                            {
-                                TProtocolUtil.Skip(iprot, field.Type);
-                            }
-                            break;
-                        case 2:
-                            if (field.Type == TType.Struct)
-                            {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                Expression = iprot.ReadString();
                             }
                             else
                             {
@@ -126,25 +96,16 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("TCellVisibility");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                if (Expression != null && __isset.expression)
                 {
-                    field.Name = "columnName";
+                    field.Name = "expression";
                     field.Type = TType.String;
                     field.ID = 1;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
-                    oprot.WriteFieldEnd();
-                }
-                if (Cell != null && __isset.cell)
-                {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
-                    field.ID = 2;
-                    oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
+                    oprot.WriteString(Expression);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -158,26 +119,19 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
+            StringBuilder __sb = new StringBuilder("TCellVisibility(");
             bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            if (Expression != null && __isset.expression)
             {
                 if (!__first) { __sb.Append(", "); }
                 __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
-            }
-            if (Cell != null && __isset.cell)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
+                __sb.Append("Expression: ");
+                __sb.Append(Expression);
             }
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

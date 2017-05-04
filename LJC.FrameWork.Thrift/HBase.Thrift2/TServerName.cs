@@ -15,43 +15,41 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
-    /// <summary>
-    /// Holds column name and the cell.
-    /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class TServerName : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private int _port;
+        private long _startCode;
 
-        public byte[] ColumnName
+        public string HostName { get; set; }
+
+        public int Port
         {
             get
             {
-                return _columnName;
+                return _port;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
+                __isset.port = true;
+                this._port = value;
             }
         }
 
-        public TCell Cell
+        public long StartCode
         {
             get
             {
-                return _cell;
+                return _startCode;
             }
             set
             {
-                __isset.cell = true;
-                this._cell = value;
+                __isset.startCode = true;
+                this._startCode = value;
             }
         }
 
@@ -62,12 +60,18 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool port;
+            public bool startCode;
         }
 
-        public TColumn()
+        public TServerName()
         {
+        }
+
+        public TServerName(string hostName)
+            : this()
+        {
+            this.HostName = hostName;
         }
 
         public void Read(TProtocol iprot)
@@ -75,6 +79,7 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_hostName = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -89,7 +94,8 @@ namespace HBase.Thrift
                         case 1:
                             if (field.Type == TType.String)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                HostName = iprot.ReadString();
+                                isset_hostName = true;
                             }
                             else
                             {
@@ -97,10 +103,19 @@ namespace HBase.Thrift
                             }
                             break;
                         case 2:
-                            if (field.Type == TType.Struct)
+                            if (field.Type == TType.I32)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                Port = iprot.ReadI32();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 3:
+                            if (field.Type == TType.I64)
+                            {
+                                StartCode = iprot.ReadI64();
                             }
                             else
                             {
@@ -114,6 +129,8 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_hostName)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -126,25 +143,31 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("TServerName");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                field.Name = "hostName";
+                field.Type = TType.String;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteString(HostName);
+                oprot.WriteFieldEnd();
+                if (__isset.port)
                 {
-                    field.Name = "columnName";
-                    field.Type = TType.String;
-                    field.ID = 1;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
-                    oprot.WriteFieldEnd();
-                }
-                if (Cell != null && __isset.cell)
-                {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
+                    field.Name = "port";
+                    field.Type = TType.I32;
                     field.ID = 2;
                     oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
+                    oprot.WriteI32(Port);
+                    oprot.WriteFieldEnd();
+                }
+                if (__isset.startCode)
+                {
+                    field.Name = "startCode";
+                    field.Type = TType.I64;
+                    field.ID = 3;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteI64(StartCode);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -158,26 +181,23 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
-            bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            StringBuilder __sb = new StringBuilder("TServerName(");
+            __sb.Append(", HostName: ");
+            __sb.Append(HostName);
+            if (__isset.port)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
+                __sb.Append(", Port: ");
+                __sb.Append(Port);
             }
-            if (Cell != null && __isset.cell)
+            if (__isset.startCode)
             {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
+                __sb.Append(", StartCode: ");
+                __sb.Append(StartCode);
             }
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

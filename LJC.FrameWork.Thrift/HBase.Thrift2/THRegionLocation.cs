@@ -14,60 +14,28 @@ using Thrift.Collections;
 using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
-
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
 
-    /// <summary>
-    /// Holds column name and the cell.
-    /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class THRegionLocation : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
 
-        public byte[] ColumnName
+        public TServerName ServerName { get; set; }
+
+        public THRegionInfo RegionInfo { get; set; }
+
+        public THRegionLocation()
         {
-            get
-            {
-                return _columnName;
-            }
-            set
-            {
-                __isset.columnName = true;
-                this._columnName = value;
-            }
         }
 
-        public TCell Cell
+        public THRegionLocation(TServerName serverName, THRegionInfo regionInfo)
+            : this()
         {
-            get
-            {
-                return _cell;
-            }
-            set
-            {
-                __isset.cell = true;
-                this._cell = value;
-            }
-        }
-
-
-        public Isset __isset;
-#if !SILVERLIGHT
-        [Serializable]
-#endif
-        public struct Isset
-        {
-            public bool columnName;
-            public bool cell;
-        }
-
-        public TColumn()
-        {
+            this.ServerName = serverName;
+            this.RegionInfo = regionInfo;
         }
 
         public void Read(TProtocol iprot)
@@ -75,6 +43,8 @@ namespace HBase.Thrift
             iprot.IncrementRecursionDepth();
             try
             {
+                bool isset_serverName = false;
+                bool isset_regionInfo = false;
                 TField field;
                 iprot.ReadStructBegin();
                 while (true)
@@ -87,9 +57,11 @@ namespace HBase.Thrift
                     switch (field.ID)
                     {
                         case 1:
-                            if (field.Type == TType.String)
+                            if (field.Type == TType.Struct)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                ServerName = new TServerName();
+                                ServerName.Read(iprot);
+                                isset_serverName = true;
                             }
                             else
                             {
@@ -99,8 +71,9 @@ namespace HBase.Thrift
                         case 2:
                             if (field.Type == TType.Struct)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                RegionInfo = new THRegionInfo();
+                                RegionInfo.Read(iprot);
+                                isset_regionInfo = true;
                             }
                             else
                             {
@@ -114,6 +87,10 @@ namespace HBase.Thrift
                     iprot.ReadFieldEnd();
                 }
                 iprot.ReadStructEnd();
+                if (!isset_serverName)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
+                if (!isset_regionInfo)
+                    throw new TProtocolException(TProtocolException.INVALID_DATA);
             }
             finally
             {
@@ -126,27 +103,21 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("THRegionLocation");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
-                {
-                    field.Name = "columnName";
-                    field.Type = TType.String;
-                    field.ID = 1;
-                    oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
-                    oprot.WriteFieldEnd();
-                }
-                if (Cell != null && __isset.cell)
-                {
-                    field.Name = "cell";
-                    field.Type = TType.Struct;
-                    field.ID = 2;
-                    oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
-                    oprot.WriteFieldEnd();
-                }
+                field.Name = "serverName";
+                field.Type = TType.Struct;
+                field.ID = 1;
+                oprot.WriteFieldBegin(field);
+                ServerName.Write(oprot);
+                oprot.WriteFieldEnd();
+                field.Name = "regionInfo";
+                field.Type = TType.Struct;
+                field.ID = 2;
+                oprot.WriteFieldBegin(field);
+                RegionInfo.Write(oprot);
+                oprot.WriteFieldEnd();
                 oprot.WriteFieldStop();
                 oprot.WriteStructEnd();
             }
@@ -158,26 +129,15 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
-            bool __first = true;
-            if (ColumnName != null && __isset.columnName)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
-            }
-            if (Cell != null && __isset.cell)
-            {
-                if (!__first) { __sb.Append(", "); }
-                __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
-            }
+            StringBuilder __sb = new StringBuilder("THRegionLocation(");
+            __sb.Append(", ServerName: ");
+            __sb.Append(ServerName == null ? "<null>" : ServerName.ToString());
+            __sb.Append(", RegionInfo: ");
+            __sb.Append(RegionInfo == null ? "<null>" : RegionInfo.ToString());
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

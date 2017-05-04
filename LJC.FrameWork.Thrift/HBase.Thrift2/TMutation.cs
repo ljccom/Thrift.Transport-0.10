@@ -15,43 +15,42 @@ using System.Runtime.Serialization;
 using Thrift.Protocol;
 using Thrift.Transport;
 
-namespace HBase.Thrift
+namespace HBase.Thrift2
 {
-
     /// <summary>
-    /// Holds column name and the cell.
+    /// Atomic mutation for the specified row. It can be either Put or Delete.
     /// </summary>
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public partial class TColumn : TBase
+    public partial class TMutation : TBase
     {
-        private byte[] _columnName;
-        private TCell _cell;
+        private TPut _put;
+        private TDelete _deleteSingle;
 
-        public byte[] ColumnName
+        public TPut Put
         {
             get
             {
-                return _columnName;
+                return _put;
             }
             set
             {
-                __isset.columnName = true;
-                this._columnName = value;
+                __isset.put = true;
+                this._put = value;
             }
         }
 
-        public TCell Cell
+        public TDelete DeleteSingle
         {
             get
             {
-                return _cell;
+                return _deleteSingle;
             }
             set
             {
-                __isset.cell = true;
-                this._cell = value;
+                __isset.deleteSingle = true;
+                this._deleteSingle = value;
             }
         }
 
@@ -62,11 +61,11 @@ namespace HBase.Thrift
 #endif
         public struct Isset
         {
-            public bool columnName;
-            public bool cell;
+            public bool put;
+            public bool deleteSingle;
         }
 
-        public TColumn()
+        public TMutation()
         {
         }
 
@@ -87,9 +86,10 @@ namespace HBase.Thrift
                     switch (field.ID)
                     {
                         case 1:
-                            if (field.Type == TType.String)
+                            if (field.Type == TType.Struct)
                             {
-                                ColumnName = iprot.ReadBinary();
+                                Put = new TPut();
+                                Put.Read(iprot);
                             }
                             else
                             {
@@ -99,8 +99,8 @@ namespace HBase.Thrift
                         case 2:
                             if (field.Type == TType.Struct)
                             {
-                                Cell = new TCell();
-                                Cell.Read(iprot);
+                                DeleteSingle = new TDelete();
+                                DeleteSingle.Read(iprot);
                             }
                             else
                             {
@@ -126,25 +126,25 @@ namespace HBase.Thrift
             oprot.IncrementRecursionDepth();
             try
             {
-                TStruct struc = new TStruct("TColumn");
+                TStruct struc = new TStruct("TMutation");
                 oprot.WriteStructBegin(struc);
                 TField field = new TField();
-                if (ColumnName != null && __isset.columnName)
+                if (Put != null && __isset.put)
                 {
-                    field.Name = "columnName";
-                    field.Type = TType.String;
+                    field.Name = "put";
+                    field.Type = TType.Struct;
                     field.ID = 1;
                     oprot.WriteFieldBegin(field);
-                    oprot.WriteBinary(ColumnName);
+                    Put.Write(oprot);
                     oprot.WriteFieldEnd();
                 }
-                if (Cell != null && __isset.cell)
+                if (DeleteSingle != null && __isset.deleteSingle)
                 {
-                    field.Name = "cell";
+                    field.Name = "deleteSingle";
                     field.Type = TType.Struct;
                     field.ID = 2;
                     oprot.WriteFieldBegin(field);
-                    Cell.Write(oprot);
+                    DeleteSingle.Write(oprot);
                     oprot.WriteFieldEnd();
                 }
                 oprot.WriteFieldStop();
@@ -158,26 +158,26 @@ namespace HBase.Thrift
 
         public override string ToString()
         {
-            StringBuilder __sb = new StringBuilder("TColumn(");
+            StringBuilder __sb = new StringBuilder("TMutation(");
             bool __first = true;
-            if (ColumnName != null && __isset.columnName)
+            if (Put != null && __isset.put)
             {
                 if (!__first) { __sb.Append(", "); }
                 __first = false;
-                __sb.Append("ColumnName: ");
-                __sb.Append(ColumnName);
+                __sb.Append("Put: ");
+                __sb.Append(Put == null ? "<null>" : Put.ToString());
             }
-            if (Cell != null && __isset.cell)
+            if (DeleteSingle != null && __isset.deleteSingle)
             {
                 if (!__first) { __sb.Append(", "); }
                 __first = false;
-                __sb.Append("Cell: ");
-                __sb.Append(Cell == null ? "<null>" : Cell.ToString());
+                __sb.Append("DeleteSingle: ");
+                __sb.Append(DeleteSingle == null ? "<null>" : DeleteSingle.ToString());
             }
             __sb.Append(")");
             return __sb.ToString();
         }
 
     }
-}
 
+}

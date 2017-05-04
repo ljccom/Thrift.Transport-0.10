@@ -16,167 +16,185 @@ using Thrift.Protocol;
 using Thrift.Transport;
 
 
-/// <summary>
-/// A BatchMutation object is used to apply a number of Mutations to a single row.
-/// </summary>
-#if !SILVERLIGHT
-[Serializable]
-#endif
-public partial class BatchMutation : TBase
+namespace HBase.Thrift
 {
-  private byte[] _row;
-  private List<Mutation> _mutations;
-
-  public byte[] Row
-  {
-    get
+    /// <summary>
+    /// A BatchMutation object is used to apply a number of Mutations to a single row.
+    /// </summary>
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    public partial class BatchMutation : TBase
     {
-      return _row;
-    }
-    set
-    {
-      __isset.row = true;
-      this._row = value;
-    }
-  }
+        private byte[] _row;
+        private List<Mutation> _mutations;
 
-  public List<Mutation> Mutations
-  {
-    get
-    {
-      return _mutations;
-    }
-    set
-    {
-      __isset.mutations = true;
-      this._mutations = value;
-    }
-  }
-
-
-  public Isset __isset;
-  #if !SILVERLIGHT
-  [Serializable]
-  #endif
-  public struct Isset {
-    public bool row;
-    public bool mutations;
-  }
-
-  public BatchMutation() {
-  }
-
-  public void Read (TProtocol iprot)
-  {
-    iprot.IncrementRecursionDepth();
-    try
-    {
-      TField field;
-      iprot.ReadStructBegin();
-      while (true)
-      {
-        field = iprot.ReadFieldBegin();
-        if (field.Type == TType.Stop) { 
-          break;
-        }
-        switch (field.ID)
+        public byte[] Row
         {
-          case 1:
-            if (field.Type == TType.String) {
-              Row = iprot.ReadBinary();
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+            get
+            {
+                return _row;
             }
-            break;
-          case 2:
-            if (field.Type == TType.List) {
-              {
-                Mutations = new List<Mutation>();
-                TList _list0 = iprot.ReadListBegin();
-                for( int _i1 = 0; _i1 < _list0.Count; ++_i1)
+            set
+            {
+                __isset.row = true;
+                this._row = value;
+            }
+        }
+
+        public List<Mutation> Mutations
+        {
+            get
+            {
+                return _mutations;
+            }
+            set
+            {
+                __isset.mutations = true;
+                this._mutations = value;
+            }
+        }
+
+
+        public Isset __isset;
+#if !SILVERLIGHT
+        [Serializable]
+#endif
+        public struct Isset
+        {
+            public bool row;
+            public bool mutations;
+        }
+
+        public BatchMutation()
+        {
+        }
+
+        public void Read(TProtocol iprot)
+        {
+            iprot.IncrementRecursionDepth();
+            try
+            {
+                TField field;
+                iprot.ReadStructBegin();
+                while (true)
                 {
-                  Mutation _elem2;
-                  _elem2 = new Mutation();
-                  _elem2.Read(iprot);
-                  Mutations.Add(_elem2);
+                    field = iprot.ReadFieldBegin();
+                    if (field.Type == TType.Stop)
+                    {
+                        break;
+                    }
+                    switch (field.ID)
+                    {
+                        case 1:
+                            if (field.Type == TType.String)
+                            {
+                                Row = iprot.ReadBinary();
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        case 2:
+                            if (field.Type == TType.List)
+                            {
+                                {
+                                    Mutations = new List<Mutation>();
+                                    TList _list0 = iprot.ReadListBegin();
+                                    for (int _i1 = 0; _i1 < _list0.Count; ++_i1)
+                                    {
+                                        Mutation _elem2;
+                                        _elem2 = new Mutation();
+                                        _elem2.Read(iprot);
+                                        Mutations.Add(_elem2);
+                                    }
+                                    iprot.ReadListEnd();
+                                }
+                            }
+                            else
+                            {
+                                TProtocolUtil.Skip(iprot, field.Type);
+                            }
+                            break;
+                        default:
+                            TProtocolUtil.Skip(iprot, field.Type);
+                            break;
+                    }
+                    iprot.ReadFieldEnd();
                 }
-                iprot.ReadListEnd();
-              }
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+                iprot.ReadStructEnd();
             }
-            break;
-          default: 
-            TProtocolUtil.Skip(iprot, field.Type);
-            break;
+            finally
+            {
+                iprot.DecrementRecursionDepth();
+            }
         }
-        iprot.ReadFieldEnd();
-      }
-      iprot.ReadStructEnd();
-    }
-    finally
-    {
-      iprot.DecrementRecursionDepth();
-    }
-  }
 
-  public void Write(TProtocol oprot) {
-    oprot.IncrementRecursionDepth();
-    try
-    {
-      TStruct struc = new TStruct("BatchMutation");
-      oprot.WriteStructBegin(struc);
-      TField field = new TField();
-      if (Row != null && __isset.row) {
-        field.Name = "row";
-        field.Type = TType.String;
-        field.ID = 1;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteBinary(Row);
-        oprot.WriteFieldEnd();
-      }
-      if (Mutations != null && __isset.mutations) {
-        field.Name = "mutations";
-        field.Type = TType.List;
-        field.ID = 2;
-        oprot.WriteFieldBegin(field);
+        public void Write(TProtocol oprot)
         {
-          oprot.WriteListBegin(new TList(TType.Struct, Mutations.Count));
-          foreach (Mutation _iter3 in Mutations)
-          {
-            _iter3.Write(oprot);
-          }
-          oprot.WriteListEnd();
+            oprot.IncrementRecursionDepth();
+            try
+            {
+                TStruct struc = new TStruct("BatchMutation");
+                oprot.WriteStructBegin(struc);
+                TField field = new TField();
+                if (Row != null && __isset.row)
+                {
+                    field.Name = "row";
+                    field.Type = TType.String;
+                    field.ID = 1;
+                    oprot.WriteFieldBegin(field);
+                    oprot.WriteBinary(Row);
+                    oprot.WriteFieldEnd();
+                }
+                if (Mutations != null && __isset.mutations)
+                {
+                    field.Name = "mutations";
+                    field.Type = TType.List;
+                    field.ID = 2;
+                    oprot.WriteFieldBegin(field);
+                    {
+                        oprot.WriteListBegin(new TList(TType.Struct, Mutations.Count));
+                        foreach (Mutation _iter3 in Mutations)
+                        {
+                            _iter3.Write(oprot);
+                        }
+                        oprot.WriteListEnd();
+                    }
+                    oprot.WriteFieldEnd();
+                }
+                oprot.WriteFieldStop();
+                oprot.WriteStructEnd();
+            }
+            finally
+            {
+                oprot.DecrementRecursionDepth();
+            }
         }
-        oprot.WriteFieldEnd();
-      }
-      oprot.WriteFieldStop();
-      oprot.WriteStructEnd();
-    }
-    finally
-    {
-      oprot.DecrementRecursionDepth();
-    }
-  }
 
-  public override string ToString() {
-    StringBuilder __sb = new StringBuilder("BatchMutation(");
-    bool __first = true;
-    if (Row != null && __isset.row) {
-      if(!__first) { __sb.Append(", "); }
-      __first = false;
-      __sb.Append("Row: ");
-      __sb.Append(Row);
-    }
-    if (Mutations != null && __isset.mutations) {
-      if(!__first) { __sb.Append(", "); }
-      __first = false;
-      __sb.Append("Mutations: ");
-      __sb.Append(Mutations);
-    }
-    __sb.Append(")");
-    return __sb.ToString();
-  }
+        public override string ToString()
+        {
+            StringBuilder __sb = new StringBuilder("BatchMutation(");
+            bool __first = true;
+            if (Row != null && __isset.row)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("Row: ");
+                __sb.Append(Row);
+            }
+            if (Mutations != null && __isset.mutations)
+            {
+                if (!__first) { __sb.Append(", "); }
+                __first = false;
+                __sb.Append("Mutations: ");
+                __sb.Append(Mutations);
+            }
+            __sb.Append(")");
+            return __sb.ToString();
+        }
 
+    }
 }
 
