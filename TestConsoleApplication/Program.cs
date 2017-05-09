@@ -16,7 +16,8 @@ namespace TestConsoleApplication
             try
             {
                 //实例化Socket连接
-                transport = new TSocket("2.5.172.38", 30001);
+                //transport = new TSocket("2.5.172.38", 30001);
+                transport = new TSocket("hbaseclient1");
                 //实例化一个协议对象
                 TProtocol tProtocol = new TBinaryProtocol(transport);
                 //实例化一个Hbase的Client对象
@@ -50,18 +51,24 @@ namespace TestConsoleApplication
                 //}
 
                 var tables = client.getTableNames();
+                
 
                 foreach (var bi in tables)
                 {
-                    var tb = Encoding.UTF8.GetString(bi);
-                    Console.WriteLine(tb);
                     transport.Close();
                     transport.Open();
-                    var dic = client.getColumnDescriptors(bi);
-                    foreach (var kv in dic)
-                    {
-                        Console.WriteLine(string.Format("{0}:{1}", Encoding.UTF8.GetString(kv.Key), Encoding.UTF8.GetString(kv.Value.Name)));
-                    }
+                    client.disableTable(bi);
+                    client.deleteTable(bi);
+
+                    //var tb = Encoding.UTF8.GetString(bi);
+                    //Console.WriteLine(tb);
+                    //transport.Close();
+                    //transport.Open();
+                    //var dic = client.getColumnDescriptors(bi);
+                    //foreach (var kv in dic)
+                    //{
+                    //    Console.WriteLine(string.Format("{0}:{1}", Encoding.UTF8.GetString(kv.Key), Encoding.UTF8.GetString(kv.Value.Name)));
+                    //}
                 }
 
             }

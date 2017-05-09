@@ -23,6 +23,7 @@
 
 using System;
 using System.Net.Sockets;
+using Thrift.Transport.HBaseConfig;
 
 namespace Thrift.Transport
 {
@@ -54,6 +55,17 @@ namespace Thrift.Transport
             this.host = host;
             this.port = port;
             this.timeout = timeout;
+
+            InitSocket();
+        }
+
+        public TSocket(string configname)
+        {
+            var config = (HBaseClientConfig)System.Configuration.ConfigurationManager.GetSection(configname);
+
+            this.host = config.Host;
+            this.port = config.Port;
+            this.timeout = config.TimeOut;
 
             InitSocket();
         }
