@@ -75,11 +75,17 @@ namespace HBase.Thrift.HbaseTests
             TProtocol tProtocol = new TBinaryProtocol(transport);
 
             string logtablename = "logs";
-            using (var client = new HBase.Thrift.Hbase.Client(tProtocol))
+            //using (var client = new HBase.Thrift.Hbase.Client(tProtocol))
+            //{
+            //    transport.Open();
+
+            //    var rows = client.getRow(Encoding.UTF8.GetBytes(logtablename), Encoding.UTF8.GetBytes("row1"), null);
+            //}
+            using (var client = new HBase.Thrift2.THBaseService.Client(tProtocol))
             {
                 transport.Open();
 
-                var rows = client.getRow(Encoding.UTF8.GetBytes(logtablename), Encoding.UTF8.GetBytes("row1"), null);
+                var rows = client.get(Encoding.UTF8.GetBytes(logtablename), new Thrift2.TGet(Encoding.UTF8.GetBytes("row1")));
             }
         }
     }

@@ -112,6 +112,8 @@
     <Compile Include="Protocol\TSet.cs" />
     <Compile Include="Protocol\TStruct.cs" />
     <Compile Include="Protocol\TType.cs" />
+    <Compile Include="Serializer\ITSerializer.cs" />
+    <Compile Include="Serializer\TSerializer.cs" />
     <Compile Include="Server\TServer.cs" />
     <Compile Include="Server\TServerEventHandler.cs" />
     <Compile Include="Server\TSimpleServer.cs" />
@@ -143,6 +145,8 @@
     <Compile Include="Transport\TTransportException.cs" />
     <Compile Include="Transport\TTransportFactory.cs" />
     <Compile Include="TSingletonProcessorFactory.cs" />
+    <Compile Include="Warpper\TColumnValueWarpper.cs" />
+    <Compile Include="Warpper\Thrift2ClientWarpper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

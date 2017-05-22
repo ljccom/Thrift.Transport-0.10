@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using Thrift.Protocol;
 using Thrift.Transport;
+using Thrift.Transport.Serializer;
+using Thrift.Transport.Warpper;
 
 namespace TestConsoleApplication
 {
@@ -12,6 +14,34 @@ namespace TestConsoleApplication
     {
         static void Main(string[] args)
         {
+            TSerializer.RegisterSerializer(new SelfTSerializer());
+
+            Man man=new Man();
+            man.Name="李金川";
+            man.Sex=1;
+            man.Age=30;
+            Thrift2ClientWarpper.Put<Man>("hbaseclient1", "test", "man", man.Name, man, (m) =>
+                {
+                    var tps = LJC.FrameWork.EntityBuf.EntityBufCore.GetTypeEntityBufType(typeof(Man));
+                    var list = new List<KeyValuePair<string, object>>();
+                    foreach (Tuple<LJC.FrameWork.EntityBuf.EntityBufType,bool> it in tps)
+                    {
+                        list.Add(new KeyValuePair<string, object>(it.Item1.Property.PropertyInfo.Name, it.Item1.Property.PropertyInfo.GetValue(m)));
+                    }
+                    return list;
+                });
+
+            var result = Thrift2ClientWarpper.Get<Man>("hbaseclient1", "test", man.Name, (t, s) =>
+                {
+                    var tps = LJC.FrameWork.EntityBuf.EntityBufCore.GetTypeEntityBufType(t);
+                    var pop = tps.First(p => p.Item1.Property.PropertyInfo.Name.Equals(s));
+
+                    return pop.Item1.Property.PropertyInfo;
+                });
+
+            return;
+
+
             TTransport transport = null;
             try
             {
