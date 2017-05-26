@@ -20,6 +20,8 @@ namespace TestConsoleApplication
             man.Name="李金川";
             man.Sex=1;
             man.Age=30;
+            man.Fei = new int[] { 1, 2, 3 };
+            man.Addr = new List<string> { "老师","学生","朋友"};
             Thrift2ClientWarpper.Put<Man>("hbaseclient1", "test", "man", man.Name, man, (m) =>
                 {
                     var tps = LJC.FrameWork.EntityBuf.EntityBufCore.GetTypeEntityBufType(typeof(Man));
@@ -30,6 +32,31 @@ namespace TestConsoleApplication
                     }
                     return list;
                 });
+
+            Thrift2ClientWarpper.CheckAndDelete("hbaseclient1", "test", man.Name, "man", "Name", "李金川", new[] { "Sex" });
+            var resultljc = Thrift2ClientWarpper.Get<Man>("hbaseclient1", "test", man.Name, (t, s) =>
+            {
+                var tps = LJC.FrameWork.EntityBuf.EntityBufCore.GetTypeEntityBufType(t);
+                var pop = tps.First(p => p.Item1.Property.PropertyInfo.Name.Equals(s));
+
+                return pop.Item1.Property.PropertyInfo;
+            });
+
+
+            man.Name = "张三丰";
+            man.Age = 100;
+            Thrift2ClientWarpper.Append<Man>("hbaseclient1", "test", man.Name, "man", man, (m) =>
+            {
+                var tps = LJC.FrameWork.EntityBuf.EntityBufCore.GetTypeEntityBufType(typeof(Man));
+                var list = new List<KeyValuePair<string, object>>();
+                foreach (Tuple<LJC.FrameWork.EntityBuf.EntityBufType, bool> it in tps)
+                {
+                    list.Add(new KeyValuePair<string, object>(it.Item1.Property.PropertyInfo.Name, it.Item1.Property.PropertyInfo.GetValue(m)));
+                }
+                return list;
+            });
+
+            Thrift2ClientWarpper.Delete("hbaseclient1", "test", man.Name);
 
             var result = Thrift2ClientWarpper.Get<Man>("hbaseclient1", "test", man.Name, (t, s) =>
                 {

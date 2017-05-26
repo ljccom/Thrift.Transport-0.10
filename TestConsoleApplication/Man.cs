@@ -25,5 +25,17 @@ namespace TestConsoleApplication
             get;
             set;
         }
+
+        public int[] Fei
+        {
+            get;
+            set;
+        }
+
+        public List<string> Addr
+        {
+            get;
+            set;
+        }
     }
 }
